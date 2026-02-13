@@ -207,3 +207,84 @@ export const getCartController = async (req, res) => {
         });
     }
 };
+
+//update profile
+export const updateProfileController = async (req, res) => {
+    try {
+        const { name, email, password, address, phone } = req.body;
+        const user = await userModel.findById(req.user._id);
+        //check valid password
+        if (password && password.length < 6) {
+            return res.json({ error: "Passsword is required and 6 character long" });
+        }
+        const hashedPassword = password ? await hashPassword(password) : undefined;
+        const updatedUser = await userModel.findByIdAndUpdate(
+            req.user._id,
+            {
+                name: name || user.name,
+                password: hashedPassword || user.password,
+                phone: phone || user.phone,
+                address: address || user.address,
+            },
+            { new: true }
+        );
+        res.status(200).send({
+            success: true,
+            message: "Profile Updated Successfully",
+            updatedUser,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({
+            success: false,
+            message: "Error While Update Profile",
+            error,
+        });
+    }
+};
+
+// Toggle Wishlist
+export const toggleWishlistController = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        const user = await userModel.findById(req.user._id);
+        const index = user.wishlist.indexOf(productId);
+
+        if (index === -1) {
+            // Add to wishlist
+            user.wishlist.push(productId);
+            await user.save();
+            res.status(200).send({ success: true, message: "Added to Wishlist", wishlist: user.wishlist });
+        } else {
+            // Remove from wishlist
+            user.wishlist.splice(index, 1);
+            await user.save();
+            res.status(200).send({ success: true, message: "Removed from Wishlist", wishlist: user.wishlist });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error in Wishlist",
+            error,
+        });
+    }
+};
+
+// Get Wishlist
+export const getWishlistController = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.user._id).populate("wishlist");
+        res.status(200).send({
+            success: true,
+            wishlist: user.wishlist,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while getting wishlist",
+            error,
+        });
+    }
+};

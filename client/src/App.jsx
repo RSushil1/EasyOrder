@@ -16,6 +16,11 @@ import Home from './pages/Home';
 import Cart from './components/Cart';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
+import PrivateRoute from './components/Routes/PrivateRoute';
+import Dashboard from './pages/user/Dashboard';
+import Profile from './pages/user/Profile';
+import Orders from './pages/user/Orders';
+import Wishlist from './pages/user/Wishlist';
 
 function App() {
   return (
@@ -33,6 +38,14 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/order-success/:id" element={<OrderSuccess />} />
+
+                {/* User Private Routes */}
+                <Route path="/dashboard" element={<PrivateRoute />}>
+                  <Route path="user" element={<Dashboard />} />
+                  <Route path="user/profile" element={<Profile />} />
+                  <Route path="user/orders" element={<Orders />} />
+                  <Route path="user/wishlist" element={<Wishlist />} />
+                </Route>
 
                 {/* Admin Routes */}
                 <Route path="/admin" element={<AdminRoute />}>

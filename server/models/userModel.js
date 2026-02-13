@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
             type: Array,
             default: [],
         },
+        wishlist: [{
+            type: mongoose.ObjectId,
+            ref: "food",
+        }],
     },
     { timestamps: true }
 );

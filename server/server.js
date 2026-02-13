@@ -11,7 +11,20 @@ dotenv.config();
 // Connect to database
 connectDB();
 
+import http from 'http';
+import { Server } from 'socket.io';
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*", // allow all origins for now, or specify client URL
+        methods: ["GET", "POST", "PUT", "DELETE"]
+    }
+});
+
+// Make io accessible in routes/controllers
+app.set('socketio', io);
 
 app.use(cors());
 app.use(express.json());
@@ -23,6 +36,14 @@ app.use('/api/orders', orderRoutes);
 
 const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+// Socket connection (optional logging)
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
 });

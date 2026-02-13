@@ -95,6 +95,11 @@ export const orderStatusController = async (req, res) => {
             { status },
             { new: true }
         );
+
+        // Emit socket event
+        const io = req.app.get('socketio');
+        io.emit('order-status-updated', { orderId, status });
+
         res.json(orders);
     } catch (error) {
         console.log(error);

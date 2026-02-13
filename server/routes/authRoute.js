@@ -6,11 +6,24 @@ import {
     getAllUsersController,
     updateCartController,
     getCartController,
+    updateProfileController,
+    toggleWishlistController,
+    getWishlistController
 } from "../controllers/authController.js";
+
+const router = express.Router();
+// ... existing code ...
+
+//update profile
+router.put("/profile/update", requireSignIn, updateProfileController);
+
+//wishlist
+router.post("/wishlist/toggle", requireSignIn, toggleWishlistController);
+router.get("/wishlist", requireSignIn, getWishlistController);
+
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 
 //router object
-const router = express.Router();
 
 //routing
 //REGISTER || METHOD POST

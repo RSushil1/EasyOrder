@@ -40,8 +40,10 @@ const Navbar = () => {
                             ) : (
                                 <>
                                     <span className="text-slate-800 font-medium">Hello, {auth.user.name}</span>
-                                    {auth.user.role === 1 && (
-                                        <Link to="/admin/dashboard" className="text-slate-600 hover:text-orange-600 font-medium transition">Dashboard</Link>
+                                    {auth.user.role === 1 ? (
+                                        <Link to="/admin/dashboard" className="text-slate-600 hover:text-orange-600 font-medium transition">Admin Dashboard</Link>
+                                    ) : (
+                                        <Link to="/dashboard/user" className="text-slate-600 hover:text-orange-600 font-medium transition">Dashboard</Link>
                                     )}
                                     <button onClick={handleLogout} className="text-slate-600 hover:text-orange-600 font-medium transition">Logout</button>
                                 </>
