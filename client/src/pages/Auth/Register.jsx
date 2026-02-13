@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useCart } from "../../context/CartContext";
 
 const Register = () => {
     const [name, setName] = useState("");
@@ -11,6 +12,7 @@ const Register = () => {
     const [address, setAddress] = useState("");
     const [answer, setAnswer] = useState("");
     const [loading, setLoading] = useState(false);
+    const { cartItems } = useCart();
     const navigate = useNavigate();
 
     // form function
@@ -25,6 +27,7 @@ const Register = () => {
                 phone,
                 address,
                 answer,
+                cart: cartItems
             });
             if (res && res.data.success) {
                 toast.success(res.data && res.data.message);

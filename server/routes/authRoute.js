@@ -4,6 +4,8 @@ import {
     loginController,
     testController,
     getAllUsersController,
+    updateCartController,
+    getCartController,
 } from "../controllers/authController.js";
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 
@@ -31,5 +33,11 @@ router.get("/admin-auth", requireSignIn, isAdmin, (req, res) => {
 
 //get all users
 router.get("/all-users", requireSignIn, isAdmin, getAllUsersController);
+
+//update cart
+router.put("/profile/cart", requireSignIn, updateCartController);
+
+//get cart
+router.get("/profile/cart", requireSignIn, getCartController);
 
 export default router;

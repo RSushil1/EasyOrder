@@ -3,12 +3,14 @@ import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../../context/auth";
+import { useCart } from "../../context/CartContext";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [auth, setAuth] = useAuth();
     const [loading, setLoading] = useState(false);
+    const { cartItems, setCartItems } = useCart();
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -21,6 +23,7 @@ const Login = () => {
             const res = await axios.post("http://localhost:8000/api/auth/login", {
                 email,
                 password,
+                cart: cartItems, // Send local cart to merge
             });
             if (res && res.data.success) {
                 toast.success(res.data && res.data.message);
@@ -29,6 +32,11 @@ const Login = () => {
                     user: res.data.user,
                     token: res.data.token,
                 });
+                // Update context cart with merged cart from server
+                if (res.data.user.cart) {
+                    setCartItems(res.data.user.cart);
+                    localStorage.setItem("cart", JSON.stringify(res.data.user.cart));
+                }
                 localStorage.setItem("auth", JSON.stringify(res.data));
                 navigate(location.state || "/");
             } else {

@@ -4,6 +4,9 @@ import orderModel from "../models/Order.js";
 export const createOrderController = async (req, res) => {
     try {
         const { cart, payment } = req.body;
+        console.log("Create Order Request Body:", req.body);
+        console.log("Cart Type:", typeof cart);
+        console.log("Cart Value:", cart);
         const order = await new orderModel({
             products: cart,
             payment: payment || {},

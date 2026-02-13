@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -9,12 +9,29 @@ const Checkout = () => {
     const { cartItems, cartTotal, clearCart } = useCart();
     const navigate = useNavigate();
     const [auth] = useAuth();
-    const [formData, setFormData] = useState({
-        customerName: auth?.user?.name || '',
-        address: auth?.user?.address || '',
-        phone: auth?.user?.phone || '',
-    });
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!auth?.token) {
+            navigate("/login", { state: "/checkout" });
+        }
+    }, [auth?.token, navigate]);
+
+    const [formData, setFormData] = useState({
+        customerName: "",
+        address: "",
+        phone: "",
+    });
+
+    useEffect(() => {
+        if (auth?.user) {
+            setFormData({
+                customerName: auth.user.name || '',
+                address: auth.user.address || '',
+                phone: auth.user.phone || '',
+            });
+        }
+    }, [auth?.user]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -31,7 +48,7 @@ const Checkout = () => {
         }));
 
         try {
-            const { data } = await axios.post('/api/orders/create-order', {
+            const { data } = await axios.post('http://localhost:8000/api/orders/create-order', {
                 cart,
                 payment: formData // Using formData as payment details/shipping info for simplicity
             });

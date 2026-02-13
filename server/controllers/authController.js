@@ -4,7 +4,7 @@ import JWT from "jsonwebtoken";
 
 export const registerController = async (req, res) => {
     try {
-        const { name, email, password, phone, address, answer } = req.body;
+        const { name, email, password, phone, address, answer, cart } = req.body;
         //validations
         if (!name) {
             return res.send({ error: "Name is Required" });
@@ -43,6 +43,7 @@ export const registerController = async (req, res) => {
             address,
             password: hashedPassword,
             answer,
+            cart: cart || []
         }).save();
 
         res.status(201).send({
@@ -63,7 +64,7 @@ export const registerController = async (req, res) => {
 //POST LOGIN
 export const loginController = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, cart } = req.body;
         //validation
         if (!email || !password) {
             return res.status(404).send({
@@ -90,6 +91,34 @@ export const loginController = async (req, res) => {
         const token = await JWT.sign({ _id: user._id }, process.env.JWT_SECRET, {
             expiresIn: "7d",
         });
+        // Merge cart if provided
+        if (cart && cart.length > 0) {
+            // Logic to merge carts: 
+            // 1. Create a map of existing DB cart items
+            // 2. Iterate over local cart items
+            // 3. If item exists in DB cart, update quantity (or keep max, or sum - user requirement "add cart to that user", implies merging/summing or appending)
+            // Let's assume summing quantities for same items, or just appending new ones.
+            // A simpler approach for now: Combine and filter duplicates by food ID.
+
+            const existingCart = user.cart || [];
+            const mergedCart = [...existingCart];
+
+            cart.forEach(localItem => {
+                const existingItemIndex = mergedCart.findIndex(dbItem => dbItem._id === localItem._id);
+                if (existingItemIndex > -1) {
+                    // Item exists, update quantity? Or keep DB? 
+                    // Let's sum quantities
+                    mergedCart[existingItemIndex].quantity += localItem.quantity;
+                } else {
+                    // Item doesn't exist, add it
+                    mergedCart.push(localItem);
+                }
+            });
+
+            user.cart = mergedCart;
+            await user.save();
+        }
+
         res.status(200).send({
             success: true,
             message: "login successfully",
@@ -100,6 +129,7 @@ export const loginController = async (req, res) => {
                 phone: user.phone,
                 address: user.address,
                 role: user.role,
+                cart: user.cart
             },
             token,
         });
@@ -133,6 +163,46 @@ export const getAllUsersController = async (req, res) => {
         res.status(500).send({
             success: false,
             message: "Error while getting users",
+            error,
+        });
+    }
+};
+
+//update cart
+export const updateCartController = async (req, res) => {
+    try {
+        const { cart } = req.body;
+        const user = await userModel.findById(req.user._id);
+        user.cart = cart;
+        await user.save();
+        res.status(200).send({
+            success: true,
+            message: "Cart Updated Successfully",
+            cart: user.cart,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while updating cart",
+            error,
+        });
+    }
+};
+
+//get cart
+export const getCartController = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.user._id);
+        res.status(200).send({
+            success: true,
+            cart: user.cart,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error while getting cart",
             error,
         });
     }
