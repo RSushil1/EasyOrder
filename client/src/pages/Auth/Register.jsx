@@ -10,11 +10,13 @@ const Register = () => {
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
     const [answer, setAnswer] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     // form function
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const res = await axios.post("http://localhost:8000/api/auth/register", {
                 name,
@@ -29,10 +31,12 @@ const Register = () => {
                 navigate("/login");
             } else {
                 toast.error(res.data.message);
+                setLoading(false);
             }
         } catch (error) {
             console.log(error);
             toast.error("Something went wrong");
+            setLoading(false);
         }
     };
 
@@ -91,9 +95,10 @@ const Register = () => {
                     />
                     <button
                         type="submit"
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+                        disabled={loading}
+                        className={`w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                        REGISTER
+                        {loading ? "Registering..." : "REGISTER"}
                     </button>
                 </form>
             </div>

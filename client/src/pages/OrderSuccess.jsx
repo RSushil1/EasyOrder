@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { Skeleton } from 'antd';
 
 const OrderSuccess = () => {
     const { id } = useParams();
@@ -30,7 +31,24 @@ const OrderSuccess = () => {
         // I will remove the simulation part for the user view.
     }, [id]);
 
-    if (loading) return <div className="text-center py-10">Loading order details...</div>;
+    if (loading)
+        return (
+            <div className="max-w-3xl mx-auto px-4 py-12 animate-fade-in-up">
+                <div className="bg-white shadow-2xl rounded-3xl overflow-hidden p-8 text-center border-t-8 border-gray-200">
+                    <div className="mb-8">
+                        <Skeleton.Avatar active size={96} shape="circle" className="mx-auto mb-6" />
+                        <Skeleton active paragraph={{ rows: 1 }} title={{ width: "60%", className: "mx-auto" }} />
+                        <Skeleton.Input active size="small" className="mx-auto mt-2" />
+                    </div>
+                    <div className="mb-10 bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                        <Skeleton active paragraph={{ rows: 3 }} />
+                    </div>
+                    <div className="text-left border border-slate-100 rounded-2xl p-6 mb-8">
+                        <Skeleton active paragraph={{ rows: 4 }} />
+                    </div>
+                </div>
+            </div>
+        );
     if (error) return <div className="text-center py-10 text-red-500">Error: {error}</div>;
     if (!order) return <div className="text-center py-10">Order not found</div>;
 

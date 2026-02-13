@@ -8,6 +8,7 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [auth, setAuth] = useAuth();
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -15,6 +16,7 @@ const Login = () => {
     // form function
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const res = await axios.post("http://localhost:8000/api/auth/login", {
                 email,
@@ -31,10 +33,12 @@ const Login = () => {
                 navigate(location.state || "/");
             } else {
                 toast.error(res.data.message);
+                setLoading(false);
             }
         } catch (error) {
             console.log(error);
             toast.error("Something went wrong");
+            setLoading(false);
         }
     };
     return (
@@ -64,9 +68,10 @@ const Login = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+                        disabled={loading}
+                        className={`w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                     >
-                        LOGIN
+                        {loading ? "Logging in..." : "LOGIN"}
                     </button>
                 </form>
             </div>
