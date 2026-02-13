@@ -105,7 +105,7 @@ const Home = () => {
                                                 setPage((prev) => prev + 1);
                                             }
                                         },
-                                        { threshold: 1 } // Trigger when 100% visible
+                                        { threshold: 0, rootMargin: "200px" }
                                     );
                                     observer.observe(el);
                                     return () => observer.disconnect();

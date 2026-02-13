@@ -199,7 +199,7 @@ export const productCountController = async (req, res) => {
 // product list base on page
 export const productListController = async (req, res) => {
     try {
-        const perPage = 8;
+        const perPage = 12;
         const page = req.params.page ? req.params.page : 1;
         const products = await foodModel
             .find({})

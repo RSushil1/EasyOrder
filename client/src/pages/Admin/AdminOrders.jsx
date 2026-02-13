@@ -22,7 +22,7 @@ const AdminOrders = () => {
     const getOrders = async () => {
         try {
             const { data } = await axios.get("/api/orders/all-orders");
-            setOrders(data);
+            setOrders(data.orders);
             setLoading(false);
         } catch (error) {
             console.log(error);

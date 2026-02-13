@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Modal } from 'antd';
 import AdminMenu from "../../components/Layout/AdminMenu";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -64,10 +65,14 @@ const UpdateProduct = () => {
     };
 
     //delete a product
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const handleDelete = async () => {
+        setIsModalOpen(true);
+    };
+
+    const handleOk = async () => {
         try {
-            let answer = window.confirm("Are You Sure want to delete this product ?");
-            if (!answer) return;
             const { data } = await axios.delete(
                 `/api/menu/delete-food/${id}`
             );
@@ -77,6 +82,11 @@ const UpdateProduct = () => {
             console.log(error);
             toast.error("Something went wrong");
         }
+        setIsModalOpen(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
     };
     return (
         <div className="container mx-auto p-4 animate-fade-in-up">
@@ -179,6 +189,9 @@ const UpdateProduct = () => {
                     </div>
                 </div>
             </div>
+            <Modal title="Confirm Delete" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                <p>Are you sure you want to delete this product?</p>
+            </Modal>
         </div>
     );
 };

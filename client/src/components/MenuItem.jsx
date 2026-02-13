@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/auth';
 import axios from 'axios';
@@ -56,6 +56,7 @@ const MenuItem = ({ item }) => {
                     className={`w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                     onLoad={() => setImageLoaded(true)}
                     loading="lazy"
+                    decoding="async"
                 />
                 <button
                     onClick={handleWishlist}
@@ -87,4 +88,4 @@ const MenuItem = ({ item }) => {
     );
 };
 
-export default MenuItem;
+export default memo(MenuItem);
