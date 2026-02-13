@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/auth';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const Checkout = () => {
     const { cartItems, cartTotal, clearCart } = useCart();
     const navigate = useNavigate();
+    const [auth] = useAuth();
     const [formData, setFormData] = useState({
-        customerName: '',
-        address: '',
-        phone: '',
+        customerName: auth?.user?.name || '',
+        address: auth?.user?.address || '',
+        phone: auth?.user?.phone || '',
     });
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -20,36 +23,27 @@ const Checkout = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(null);
 
-        const orderData = {
-            ...formData,
-            items: cartItems.map(item => ({
-                menuItem: item._id,
-                quantity: item.quantity,
-                price: item.price
-            })),
-            totalAmount: cartTotal
-        };
+        // Map cart items to backend schema
+        const cart = cartItems.map(item => ({
+            food: item._id,
+            quantity: item.quantity,
+        }));
 
         try {
-            const response = await fetch('http://localhost:5000/api/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(orderData),
+            const { data } = await axios.post('/api/orders/create-order', {
+                cart,
+                payment: formData // Using formData as payment details/shipping info for simplicity
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to place order');
+            if (data?.ok) {
+                clearCart();
+                toast.success("Order Placed Successfully");
+                navigate(`/order-success/${data.order._id}`);
             }
-
-            const order = await response.json();
-            clearCart();
-            navigate(`/order-success/${order._id}`);
         } catch (err) {
-            setError(err.message);
+            console.log(err);
+            toast.error("Failed to place order");
         } finally {
             setLoading(false);
         }
@@ -95,22 +89,10 @@ const Checkout = () => {
                     <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-2xl p-8 border border-slate-100">
                         <div className="flex items-center mb-6">
                             <div className="bg-orange-100 p-2 rounded-full mr-3">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                                🍕
                             </div>
                             <h2 className="text-xl font-bold text-slate-800">Delivery Details</h2>
                         </div>
-
-                        {error && (
-                            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6 flex items-start">
-                                <svg className="h-5 w-5 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span>{error}</span>
-                            </div>
-                        )}
 
                         <div className="space-y-6">
                             <div>
@@ -167,15 +149,7 @@ const Checkout = () => {
                             disabled={loading}
                             className={`w-full mt-8 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-4 px-6 rounded-xl hover:shadow-lg hover:from-orange-600 hover:to-red-700 transition-all transform active:scale-98 flex justify-center items-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            {loading ? (
-                                <>
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Processing Order...
-                                </>
-                            ) : 'Confirm Order'}
+                            {loading ? 'Processing...' : 'Place Order'}
                         </button>
                     </form>
                 </div>

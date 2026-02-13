@@ -7,7 +7,7 @@ const MenuItem = ({ item }) => {
         <div className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full">
             <div className="relative overflow-hidden h-48">
                 <img
-                    src={item.image}
+                    src={`/api/menu/food-photo/${item._id}`}
                     alt={item.name}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                 />

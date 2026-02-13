@@ -1,73 +1,104 @@
-import Order from '../models/Order.js';
+import orderModel from "../models/Order.js";
 
-// @desc    Create new order
-// @route   POST /api/orders
-// @access  Public
-export const createOrder = async (req, res) => {
+//create orders
+export const createOrderController = async (req, res) => {
     try {
-        const {
-            customerName,
-            address,
-            phone,
-            items,
-            totalAmount
-        } = req.body;
-
-        if (!items || items.length === 0) {
-            return res.status(400).json({ message: 'No order items' });
-        }
-
-        const order = new Order({
-            customerName,
-            address,
-            phone,
-            items,
-            totalAmount
+        const { cart, payment } = req.body;
+        const order = await new orderModel({
+            products: cart,
+            payment: payment || {},
+            buyer: req.user._id,
+        }).save();
+        // Return the created order so frontend can redirect
+        res.status(201).send({
+            ok: true,
+            success: true,
+            message: "Order Created Successfully",
+            order,
         });
-
-        const createdOrder = await order.save();
-        res.status(201).json(createdOrder);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            error,
+            message: "Error While Creating Order",
+        });
     }
 };
 
-// @desc    Get order by ID
-// @route   GET /api/orders/:id
-// @access  Public
-export const getOrderById = async (req, res) => {
+//get orders
+export const getOrdersController = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.id).populate('items.menuItem');
-
-        if (order) {
-            res.json(order);
-        } else {
-            res.status(404).json({ message: 'Order not found' });
-        }
+        const orders = await orderModel
+            .find({ buyer: req.user._id })
+            .populate("products.food", "-photo")
+            .populate("buyer", "name");
+        res.json(orders);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error While Geting Orders",
+            error,
+        });
     }
 };
 
-// @desc    Update order status
-// @route   PUT /api/orders/:id/status
-// @access  Public
-export const updateOrderStatus = async (req, res) => {
+//get single order
+export const getSingleOrderController = async (req, res) => {
     try {
+        const { orderId } = req.params;
+        const order = await orderModel
+            .findById(orderId)
+            .populate("products.food", "-photo")
+            .populate("buyer", "name");
+        res.json(order);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error While Geting Single Order",
+            error,
+        });
+    }
+};
+
+//all orders
+export const getAllOrdersController = async (req, res) => {
+    try {
+        const orders = await orderModel
+            .find({})
+            .populate("products.food", "-photo")
+            .populate("buyer", "name")
+            .sort({ createdAt: -1 });
+        res.json(orders);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error While Geting Orders",
+            error,
+        });
+    }
+};
+
+//order status
+export const orderStatusController = async (req, res) => {
+    try {
+        const { orderId } = req.params;
         const { status } = req.body;
-        const order = await Order.findById(req.params.id);
-
-        if (order) {
-            order.status = status;
-            const updatedOrder = await order.save();
-            res.json(updatedOrder);
-        } else {
-            res.status(404).json({ message: 'Order not found' });
-        }
+        const orders = await orderModel.findByIdAndUpdate(
+            orderId,
+            { status },
+            { new: true }
+        );
+        res.json(orders);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error While Updateing Order",
+            error,
+        });
     }
 };

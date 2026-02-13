@@ -9,12 +9,12 @@ const Home = () => {
     useEffect(() => {
         const fetchMenu = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/menu');
+                const response = await fetch('http://localhost:8000/api/menu/get-menu');
                 if (!response.ok) {
                     throw new Error('Failed to fetch menu');
                 }
                 const data = await response.json();
-                setMenuItems(data);
+                setMenuItems(data.products);
             } catch (err) {
                 setError(err.message);
             } finally {

@@ -1,18 +1,52 @@
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/auth';
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const Navbar = () => {
     const { cartCount, setIsCartOpen } = useCart();
+    const [auth, setAuth] = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        setAuth({
+            ...auth,
+            user: null,
+            token: "",
+        });
+        localStorage.removeItem("auth");
+        toast.success("Logout Successfully");
+        navigate("/login");
+    };
 
     return (
         <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-100 transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20">
                     <div className="flex items-center">
-                        <span className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 tracking-tight cursor-pointer hover:opacity-80 transition-opacity">
+                        <Link to="/" className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 tracking-tight cursor-pointer hover:opacity-80 transition-opacity">
                             EasyOrder <span className="text-3xl">🍕</span>
-                        </span>
+                        </Link>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-6">
+                        <div className="hidden md:flex items-center space-x-6">
+                            <Link to="/" className="text-slate-600 hover:text-orange-600 font-medium transition">Home</Link>
+                            {!auth.user ? (
+                                <>
+                                    <Link to="/register" className="text-slate-600 hover:text-orange-600 font-medium transition">Register</Link>
+                                    <Link to="/login" className="text-slate-600 hover:text-orange-600 font-medium transition">Login</Link>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="text-slate-800 font-medium">Hello, {auth.user.name}</span>
+                                    {auth.user.role === 1 && (
+                                        <Link to="/admin/dashboard" className="text-slate-600 hover:text-orange-600 font-medium transition">Dashboard</Link>
+                                    )}
+                                    <button onClick={handleLogout} className="text-slate-600 hover:text-orange-600 font-medium transition">Logout</button>
+                                </>
+                            )}
+                        </div>
+
                         <button
                             onClick={() => setIsCartOpen(true)}
                             className="relative p-3 text-slate-600 hover:text-orange-600 focus:outline-none transition-colors duration-200 rounded-full hover:bg-orange-50"
