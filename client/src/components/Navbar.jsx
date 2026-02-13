@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 const Navbar = () => {
-    const { cartCount, setIsCartOpen } = useCart();
+    const { cartCount, setIsCartOpen, clearCart } = useCart();
     const [auth, setAuth] = useAuth();
     const navigate = useNavigate();
 
@@ -15,6 +15,7 @@ const Navbar = () => {
             token: "",
         });
         localStorage.removeItem("auth");
+        clearCart(); // Clear cart on logout
         toast.success("Logout Successfully");
         navigate("/login");
     };
