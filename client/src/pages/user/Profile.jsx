@@ -23,9 +23,25 @@ const Profile = () => {
         setAddress(address);
     }, [auth?.user]);
 
+    const [error, setError] = useState(""); // Keeping for potential API errors
+    const [errors, setErrors] = useState({});
+
     // form function
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrors({}); // Clear previous errors
+
+        // Validation (Email is disabled, so we rely on existing value)
+        const newErrors = {};
+        if (!name) newErrors.name = "Name is Required";
+        if (!phone) newErrors.phone = "Phone is Required";
+        if (!address) newErrors.address = "Address is Required";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
         try {
             const { data } = await axios.put("http://localhost:8000/api/auth/profile/update", {
                 name,
@@ -70,6 +86,7 @@ const Profile = () => {
                                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                                     placeholder="Enter your name"
                                 />
+                                {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
                             </div>
                             <div>
                                 <label className="block text-slate-700 text-sm font-semibold mb-2" htmlFor="email">Email</label>
@@ -101,6 +118,7 @@ const Profile = () => {
                                     className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition"
                                     placeholder="Enter your phone"
                                 />
+                                {errors.phone && <span className="text-red-500 text-sm">{errors.phone}</span>}
                             </div>
                             <div>
                                 <label className="block text-slate-700 text-sm font-semibold mb-2" htmlFor="address">Address</label>
@@ -111,6 +129,7 @@ const Profile = () => {
                                     placeholder="Enter your address"
                                     rows="3"
                                 />
+                                {errors.address && <span className="text-red-500 text-sm">{errors.address}</span>}
                             </div>
 
                             <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
@@ -119,8 +138,8 @@ const Profile = () => {
                         </form>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

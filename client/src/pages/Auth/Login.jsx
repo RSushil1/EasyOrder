@@ -10,6 +10,7 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [auth, setAuth] = useAuth();
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState({});
     const { cartItems, setCartItems } = useCart();
 
     const navigate = useNavigate();
@@ -19,6 +20,19 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setErrors({}); // Clear previous errors
+
+        // Validation
+        const newErrors = {};
+        if (!email) newErrors.email = "Email is Required";
+        if (!password) newErrors.password = "Password is Required";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            setLoading(false);
+            return;
+        }
+
         try {
             const res = await axios.post("http://localhost:8000/api/auth/login", {
                 email,
@@ -64,8 +78,8 @@ const Login = () => {
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                             placeholder="Enter Your Email"
-                            required
                         />
+                        {errors.email && <span className="text-red-500 text-sm">{errors.email}</span>}
                     </div>
                     <div className="mb-3">
                         <input
@@ -74,8 +88,8 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
                             placeholder="Enter Your Password"
-                            required
                         />
+                        {errors.password && <span className="text-red-500 text-sm">{errors.password}</span>}
                     </div>
                     <button
                         type="submit"
