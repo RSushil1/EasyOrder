@@ -10,6 +10,7 @@ import {
     toggleWishlistController,
     getWishlistController
 } from "../controllers/authController.js";
+import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 // ... existing code ...
@@ -21,7 +22,6 @@ router.put("/profile/update", requireSignIn, updateProfileController);
 router.post("/wishlist/toggle", requireSignIn, toggleWishlistController);
 router.get("/wishlist", requireSignIn, getWishlistController);
 
-import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 
 //router object
 

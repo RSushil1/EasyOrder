@@ -5,7 +5,10 @@ import toast from 'react-hot-toast';
 
 const MenuItem = ({ item }) => {
     const { addToCart } = useCart();
-    const [auth] = useAuth();
+    const [auth, setAuth] = useAuth();
+
+    // Check if item is in wishlist
+    const isLiked = auth?.user?.wishlist?.includes(item._id);
 
     const handleWishlist = async () => {
         if (!auth?.token) {
@@ -16,6 +19,17 @@ const MenuItem = ({ item }) => {
             const { data } = await axios.post("http://localhost:8000/api/auth/wishlist/toggle", { productId: item._id });
             if (data?.success) {
                 toast.success(data.message);
+
+                // Update auth context and local storage with new wishlist
+                const updatedUser = { ...auth.user, wishlist: data.wishlist };
+                setAuth({ ...auth, user: updatedUser });
+
+                let ls = localStorage.getItem("auth");
+                if (ls) {
+                    ls = JSON.parse(ls);
+                    ls.user = updatedUser;
+                    localStorage.setItem("auth", JSON.stringify(ls));
+                }
             }
         } catch (error) {
             console.log(error);
@@ -34,9 +48,9 @@ const MenuItem = ({ item }) => {
                 <button
                     onClick={handleWishlist}
                     className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md text-slate-400 hover:text-red-500 transition-colors z-10"
-                    title="Add to Wishlist"
+                    title={isLiked ? "Remove from Wishlist" : "Add to Wishlist"}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${isLiked ? "text-red-500 fill-current" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                 </button>

@@ -24,6 +24,18 @@ const Wishlist = () => {
             const { data } = await axios.post("http://localhost:8000/api/auth/wishlist/toggle", { productId });
             if (data?.success) {
                 toast.success(data.message);
+
+                // Update auth context and local storage global state
+                const updatedUser = { ...auth.user, wishlist: data.wishlist };
+                setAuth({ ...auth, user: updatedUser });
+
+                let ls = localStorage.getItem("auth");
+                if (ls) {
+                    ls = JSON.parse(ls);
+                    ls.user = updatedUser;
+                    localStorage.setItem("auth", JSON.stringify(ls));
+                }
+
                 getWishlist();
             }
         } catch (error) {
