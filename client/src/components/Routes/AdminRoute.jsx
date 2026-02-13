@@ -6,8 +6,11 @@ import { useNavigate } from "react-router-dom";
 
 export default function AdminRoute() {
     const [ok, setOk] = useState(false);
-    const [auth, setAuth] = useState(useAuth());
+    const [auth, setAuth] = useAuth();
     const navigate = useNavigate();
+
+    console.log(auth);
+    console.log(ok);
 
     useEffect(() => {
         const authCheck = async () => {

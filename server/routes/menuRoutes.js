@@ -8,9 +8,13 @@ import {
     updateFoodController,
 } from "../controllers/menuController.js";
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
-import formidable from "express-formidable";
+import multer from "multer";
 
 const router = express.Router();
+
+//multer config
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 //routes
 //create food
@@ -18,7 +22,7 @@ router.post(
     "/create-food",
     requireSignIn,
     isAdmin,
-    formidable(),
+    upload.single("photo"),
     createFoodController
 );
 
@@ -27,7 +31,7 @@ router.put(
     "/update-food/:pid",
     requireSignIn,
     isAdmin,
-    formidable(),
+    upload.single("photo"),
     updateFoodController
 );
 

@@ -6,8 +6,8 @@ import slugify from "slugify";
 export const createFoodController = async (req, res) => {
     try {
         const { name, description, price, category, quantity, shipping } =
-            req.fields;
-        const { photo } = req.files;
+            req.body;
+        const photo = req.file;
         //validation
         switch (true) {
             case !name:
@@ -20,16 +20,16 @@ export const createFoodController = async (req, res) => {
                 return res.status(500).send({ error: "Category is Required" });
             case !quantity:
                 return res.status(500).send({ error: "Quantity is Required" });
-            case photo && photo.size > 1000000:
+            case photo && photo.size > 10000000:
                 return res
                     .status(500)
-                    .send({ error: "photo is Required and should be less then 1mb" });
+                    .send({ error: "photo is Required and should be less then 10mb" });
         }
 
-        const products = new foodModel({ ...req.fields, slug: slugify(name) });
+        const products = new foodModel({ ...req.body, slug: slugify(name) });
         if (photo) {
-            products.photo.data = fs.readFileSync(photo.path);
-            products.photo.contentType = photo.type;
+            products.photo.data = photo.buffer;
+            products.photo.contentType = photo.mimetype;
         }
         await products.save();
         res.status(201).send({
@@ -134,8 +134,8 @@ export const deleteFoodController = async (req, res) => {
 export const updateFoodController = async (req, res) => {
     try {
         const { name, description, price, category, quantity, shipping } =
-            req.fields;
-        const { photo } = req.files;
+            req.body;
+        const photo = req.file;
         //validation
         switch (true) {
             case !name:
@@ -156,12 +156,12 @@ export const updateFoodController = async (req, res) => {
 
         const products = await foodModel.findByIdAndUpdate(
             req.params.pid,
-            { ...req.fields, slug: slugify(name) },
+            { ...req.body, slug: slugify(name) },
             { new: true }
         );
         if (photo) {
-            products.photo.data = fs.readFileSync(photo.path);
-            products.photo.contentType = photo.type;
+            products.photo.data = photo.buffer;
+            products.photo.contentType = photo.mimetype;
         }
         await products.save();
         res.status(201).send({

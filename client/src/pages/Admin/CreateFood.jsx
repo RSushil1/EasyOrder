@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import AdminMenu from "../../components/Layout/AdminMenu";
 
 const CreateFood = () => {
     const navigate = useNavigate();
@@ -40,77 +41,88 @@ const CreateFood = () => {
     };
 
     return (
-        <div className="container mx-auto p-4 max-w-lg">
-            <h1 className="text-2xl font-bold mb-6">Create New Food Item</h1>
-            <form onSubmit={handleCreate} className="space-y-4 bg-white p-6 rounded shadow">
-                <input
-                    type="text"
-                    value={name}
-                    placeholder="Name"
-                    className="w-full p-2 border rounded"
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                />
-                <textarea
-                    value={description}
-                    placeholder="Description"
-                    className="w-full p-2 border rounded"
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                />
-                <input
-                    type="number"
-                    value={price}
-                    placeholder="Price"
-                    className="w-full p-2 border rounded"
-                    onChange={(e) => setPrice(e.target.value)}
-                    required
-                />
-                <input
-                    type="text"
-                    value={category}
-                    placeholder="Category (e.g., Pizza, Burger)"
-                    className="w-full p-2 border rounded"
-                    onChange={(e) => setCategory(e.target.value)}
-                    required
-                />
-                <input
-                    type="number"
-                    value={quantity}
-                    placeholder="Quantity"
-                    className="w-full p-2 border rounded"
-                    onChange={(e) => setQuantity(e.target.value)}
-                    required
-                />
-                <div className="mb-3">
-                    <label className="block mb-2 text-sm font-medium text-gray-900">Upload Photo</label>
-                    <input
-                        type="file"
-                        name="photo"
-                        accept="image/*"
-                        onChange={(e) => setPhoto(e.target.files[0])}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
+        <div className="container mx-auto p-4 animate-fade-in-up">
+            <div className="flex flex-col md:flex-row gap-6">
+                <div className="w-full md:w-1/4">
+                    <AdminMenu />
                 </div>
-
-                {photo && (
-                    <div className="mb-3">
-                        <div className="text-center">
-                            <img
-                                src={URL.createObjectURL(photo)}
-                                alt="product_photo"
-                                height={"200px"}
-                                className="img img-responsive"
+                <div className="w-full md:w-3/4">
+                    <div className="bg-white border border-slate-200 rounded-lg shadow-sm p-6 max-w-2xl mx-auto">
+                        <h1 className="text-2xl font-bold mb-6 text-slate-800">Create New Food Item</h1>
+                        <form onSubmit={handleCreate} className="space-y-4">
+                            <input
+                                type="text"
+                                value={name}
+                                placeholder="Name"
+                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                onChange={(e) => setName(e.target.value)}
+                                required
                             />
-                        </div>
-                    </div>
-                )}
+                            <textarea
+                                value={description}
+                                placeholder="Description"
+                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                onChange={(e) => setDescription(e.target.value)}
+                                required
+                            />
+                            <input
+                                type="number"
+                                value={price}
+                                placeholder="Price"
+                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                onChange={(e) => setPrice(e.target.value)}
+                                required
+                            />
+                            <input
+                                type="text"
+                                value={category}
+                                placeholder="Category (e.g., Pizza, Burger)"
+                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                onChange={(e) => setCategory(e.target.value)}
+                                required
+                            />
+                            <input
+                                type="number"
+                                value={quantity}
+                                placeholder="Quantity"
+                                className="w-full p-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                onChange={(e) => setQuantity(e.target.value)}
+                                required
+                            />
+                            <div className="mb-3">
+                                <label className="block mb-2 text-sm font-medium text-gray-900 border border-slate-300 rounded-lg p-2 cursor-pointer hover:bg-slate-50 text-center">
+                                    {photo ? photo.name : "Upload Photo"}
+                                    <input
+                                        type="file"
+                                        name="photo"
+                                        accept="image/*"
+                                        onChange={(e) => setPhoto(e.target.files[0])}
+                                        hidden
+                                        required
+                                    />
+                                </label>
+                            </div>
 
-                <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-                    Create Food
-                </button>
-            </form>
+                            {photo && (
+                                <div className="mb-3 text-center">
+                                    <div className="inline-block border p-2 rounded">
+                                        <img
+                                            src={URL.createObjectURL(photo)}
+                                            alt="product_photo"
+                                            height={"200px"}
+                                            className="img img-responsive max-h-48"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
+                                Create Food
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
