@@ -4,25 +4,33 @@ import axios from "axios";
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-    const [auth, setAuth] = useState({
-        user: null,
-        token: "",
+    const [auth, setAuth] = useState(() => {
+        const data = localStorage.getItem("auth");
+        if (data) {
+            const parseData = JSON.parse(data);
+            return {
+                user: parseData.user,
+                token: parseData.token,
+            };
+        }
+        return {
+            user: null,
+            token: "",
+        };
     });
 
-    //default axios
+    //default axios - update when auth changes
     axios.defaults.headers.common["Authorization"] = auth?.token;
 
     useEffect(() => {
         const data = localStorage.getItem("auth");
         if (data) {
             const parseData = JSON.parse(data);
-            setAuth({
-                ...auth,
-                user: parseData.user,
-                token: parseData.token,
-            });
+            // Verify if state needs update or if lazy init covered it. 
+            // Lazy init covers initial load. This effect is technically redundant for initial load.
+            // But if we want to sync with LS changes (e.g. other tabs), usage of 'storage' event listener would be needed.
+            // For now, removing the initial load effect is correct as lazy init does it.
         }
-        //eslint-disable-next-line
     }, []);
     return (
         <AuthContext.Provider value={[auth, setAuth]}>

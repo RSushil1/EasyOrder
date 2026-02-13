@@ -38,7 +38,10 @@ const Login = () => {
                     localStorage.setItem("cart", JSON.stringify(res.data.user.cart));
                 }
                 localStorage.setItem("auth", JSON.stringify(res.data));
-                navigate(location.state || "/");
+
+                // Redirect logic: Prioritize intended destination, then role-based default
+                const target = location.state || (res.data.user.role === 1 ? "/admin/dashboard" : "/");
+                navigate(target);
             } else {
                 toast.error(res.data.message);
                 setLoading(false);
