@@ -178,3 +178,45 @@ export const updateFoodController = async (req, res) => {
         });
     }
 };
+// product count
+export const productCountController = async (req, res) => {
+    try {
+        const total = await foodModel.find({}).estimatedDocumentCount();
+        res.status(200).send({
+            success: true,
+            total,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({
+            message: "Error in product count",
+            error,
+            success: false,
+        });
+    }
+};
+
+// product list base on page
+export const productListController = async (req, res) => {
+    try {
+        const perPage = 8;
+        const page = req.params.page ? req.params.page : 1;
+        const products = await foodModel
+            .find({})
+            .select("-photo")
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .sort({ createdAt: -1 });
+        res.status(200).send({
+            success: true,
+            products,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(400).send({
+            success: false,
+            message: "error in per page ctrl",
+            error,
+        });
+    }
+};

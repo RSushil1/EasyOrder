@@ -21,6 +21,9 @@ const Wishlist = () => {
 
     const removeFromWishlist = async (productId) => {
         try {
+            // Optimistic update: Remove from UI immediately
+            setWishlist(prev => prev.filter(item => item._id !== productId));
+
             const { data } = await axios.post("http://localhost:8000/api/auth/wishlist/toggle", { productId });
             if (data?.success) {
                 toast.success(data.message);
@@ -36,10 +39,13 @@ const Wishlist = () => {
                     localStorage.setItem("auth", JSON.stringify(ls));
                 }
 
-                getWishlist();
+                // No need to refetch full list if we optimistically updated
+                // getWishlist(); 
             }
         } catch (error) {
             console.log(error);
+            // Revert changes if error (optional, but good practice)
+            getWishlist();
         }
     };
 

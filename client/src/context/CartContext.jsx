@@ -21,7 +21,11 @@ export const CartProvider = ({ children }) => {
                 .then(res => {
                     if (res.data?.cart) {
                         setCartItems(res.data.cart);
-                        localStorage.setItem("cart", JSON.stringify(res.data.cart));
+                        try {
+                            localStorage.setItem("cart", JSON.stringify(res.data.cart));
+                        } catch (e) {
+                            console.error("LS Error", e);
+                        }
                     }
                 })
                 .catch(err => console.log("Error fetching cart", err));
@@ -30,10 +34,11 @@ export const CartProvider = ({ children }) => {
 
     // Sync cart to local storage and DB on change
     useEffect(() => {
-        if (cartItems.length > 0) {
+        try {
             localStorage.setItem("cart", JSON.stringify(cartItems));
-        } else {
-            localStorage.setItem("cart", JSON.stringify(cartItems));
+        } catch (error) {
+            console.error("Error saving cart to localStorage", error);
+            // Optionally clear cart or alert user if quota exceeded
         }
 
         // Sync with DB if logged in

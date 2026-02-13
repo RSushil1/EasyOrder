@@ -6,6 +6,8 @@ import {
     getMenu,
     getSingleFood,
     updateFoodController,
+    productCountController,
+    productListController,
 } from "../controllers/menuController.js";
 import { isAdmin, requireSignIn } from "../middlewares/authMiddleware.js";
 import multer from "multer";
@@ -46,5 +48,11 @@ router.get("/food-photo/:pid", foodPhotoController);
 
 //delete food
 router.delete("/delete-food/:pid", requireSignIn, isAdmin, deleteFoodController);
+
+//product count
+router.get("/product-count", productCountController);
+
+//product per page
+router.get("/product-list/:page", productListController);
 
 export default router;

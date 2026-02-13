@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/auth';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+
 const MenuItem = ({ item }) => {
     const { addToCart } = useCart();
     const [auth, setAuth] = useAuth();
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     // Check if item is in wishlist
     const isLiked = auth?.user?.wishlist?.includes(item._id);
@@ -38,16 +41,25 @@ const MenuItem = ({ item }) => {
     };
 
     return (
-        <div className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative">
-            <div className="relative overflow-hidden h-48">
+        <div className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col h-full relative animate-fade-in">
+            <div className="relative overflow-hidden h-48 bg-gray-100">
+                {!imageLoaded && (
+                    <div className="absolute inset-0 flex items-center justify-center z-0 bg-slate-100 animate-pulse">
+                        <svg className="w-10 h-10 text-slate-200" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                )}
                 <img
                     src={`http://localhost:8000/api/menu/food-photo/${item._id}`}
                     alt={item.name}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
+                    className={`w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setImageLoaded(true)}
+                    loading="lazy"
                 />
                 <button
                     onClick={handleWishlist}
-                    className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md text-slate-400 hover:text-red-500 transition-colors z-10"
+                    className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md text-slate-400 hover:text-red-500 transition-colors z-20"
                     title={isLiked ? "Remove from Wishlist" : "Add to Wishlist"}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 ${isLiked ? "text-red-500 fill-current" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

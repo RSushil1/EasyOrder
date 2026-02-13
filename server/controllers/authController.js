@@ -157,8 +157,25 @@ export const testController = (req, res) => {
 //get all users
 export const getAllUsersController = async (req, res) => {
     try {
-        const users = await userModel.find({});
-        res.json(users);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const users = await userModel.find({})
+            .skip(skip)
+            .limit(limit)
+            .sort({ createdAt: -1 });
+
+        const total = await userModel.estimatedDocumentCount();
+
+        res.json({
+            success: true,
+            users,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit)
+        });
     } catch (error) {
         console.log(error);
         res.status(500).send({
@@ -249,7 +266,7 @@ export const toggleWishlistController = async (req, res) => {
     try {
         const { productId } = req.body;
         const user = await userModel.findById(req.user._id);
-        const index = user.wishlist.indexOf(productId);
+        const index = user.wishlist.findIndex(id => id.toString() === productId);
 
         if (index === -1) {
             // Add to wishlist
@@ -275,7 +292,7 @@ export const toggleWishlistController = async (req, res) => {
 // Get Wishlist
 export const getWishlistController = async (req, res) => {
     try {
-        const user = await userModel.findById(req.user._id).populate("wishlist");
+        const user = await userModel.findById(req.user._id).populate("wishlist", "-photo");
         res.status(200).send({
             success: true,
             wishlist: user.wishlist,
