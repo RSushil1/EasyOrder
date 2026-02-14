@@ -14,6 +14,8 @@ const CreateFood = () => {
     const [photo, setPhoto] = useState("");
     const [errors, setErrors] = useState({});
 
+    const [loading, setLoading] = useState(false);
+
     const handleCreate = async (e) => {
         e.preventDefault();
         setErrors({}); // Clear previous errors
@@ -33,6 +35,7 @@ const CreateFood = () => {
         }
 
         try {
+            setLoading(true);
             const productData = new FormData();
             productData.append("name", name);
             productData.append("description", description);
@@ -50,10 +53,12 @@ const CreateFood = () => {
                 navigate("/admin/dashboard");
             } else {
                 toast.error(data?.message);
+                setLoading(false);
             }
         } catch (error) {
             console.log(error);
             toast.error("something went wrong");
+            setLoading(false);
         }
     };
 
@@ -144,8 +149,12 @@ const CreateFood = () => {
                             )}
 
 
-                            <button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                                Create Food
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className={`w-full text-white font-bold py-3 px-4 rounded-lg transition duration-200 ${loading ? 'bg-orange-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'}`}
+                            >
+                                {loading ? "Processing..." : "Create Food"}
                             </button>
                         </form>
                     </div>
