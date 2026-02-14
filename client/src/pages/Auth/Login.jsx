@@ -99,6 +99,35 @@ const Login = () => {
                         {loading ? "Logging in..." : "LOGIN"}
                     </button>
                 </form>
+                <div className="mt-6 grid grid-cols-2 gap-4">
+                    <div
+                        onClick={() => {
+                            setEmail("s@gmail.com");
+                            setPassword("123456");
+                            toast.success("Admin credentials filled");
+                        }}
+                        className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm text-slate-600 cursor-pointer hover:bg-slate-100 hover:border-orange-200 transition-all active:scale-95"
+                    >
+                        <p className="font-semibold mb-2 text-orange-600">Admin Login</p>
+                        <p className="flex justify-between"><span>Email:</span> <span className="font-mono text-slate-800">s@gmail.com</span></p>
+                        <p className="flex justify-between"><span>Pass:</span> <span className="font-mono text-slate-800">123456</span></p>
+                        <div className="mt-2 text-xs text-center text-orange-500 font-medium bg-orange-50 py-1 rounded">Click to Fill</div>
+                    </div>
+
+                    <div
+                        onClick={() => {
+                            setEmail("r@gmail.com");
+                            setPassword("123456");
+                            toast.success("User credentials filled");
+                        }}
+                        className="p-4 bg-slate-50 rounded-lg border border-slate-200 text-sm text-slate-600 cursor-pointer hover:bg-slate-100 hover:border-blue-200 transition-all active:scale-95"
+                    >
+                        <p className="font-semibold mb-2 text-blue-600">User Login</p>
+                        <p className="flex justify-between"><span>Email:</span> <span className="font-mono text-slate-800">r@gmail.com</span></p>
+                        <p className="flex justify-between"><span>Pass:</span> <span className="font-mono text-slate-800">123456</span></p>
+                        <div className="mt-2 text-xs text-center text-blue-500 font-medium bg-blue-50 py-1 rounded">Click to Fill</div>
+                    </div>
+                </div>
             </div>
         </div>
     );
