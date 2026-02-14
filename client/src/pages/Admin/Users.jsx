@@ -17,7 +17,7 @@ const Users = () => {
             // Wait, I haven't created it yet. I should create it efficiently.
             // I will create a new route in authRoute `get-users`.
             const { data } = await axios.get("/api/auth/all-users");
-            setUsers(data);
+            setUsers(data.users);
             setLoading(false);
         } catch (error) {
             console.log(error);
