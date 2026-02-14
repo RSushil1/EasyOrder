@@ -67,7 +67,7 @@ const AdminOrders = () => {
                                         <div>
                                             <span className="font-mono bg-white border border-slate-200 px-2 py-1 rounded text-xs text-slate-500 mr-2">#{i + 1}</span>
                                             <span className="text-sm text-slate-500">
-                                                {moment(o?.createdAt).fromNow()}
+                                                {moment(o?.createdAt).format("MMMM Do YYYY, h:mm:ss a")}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-4">

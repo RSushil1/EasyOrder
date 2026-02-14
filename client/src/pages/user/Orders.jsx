@@ -73,7 +73,7 @@ const Orders = () => {
                                         <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
                                             <div>
                                                 <span className="font-bold text-slate-700">Order #{o._id.slice(-6).toUpperCase()}</span>
-                                                <span className="text-slate-500 text-sm ml-2">{moment(o?.createAt).fromNow()}</span>
+                                                <span className="text-slate-500 text-sm ml-2 block sm:inline">{moment(o?.createAt).format("MMMM Do YYYY, h:mm:ss a")}</span>
                                             </div>
                                             <span
                                                 className={`px-3 py-1 rounded-full text-sm font-semibold 
