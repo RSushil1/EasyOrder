@@ -12,7 +12,7 @@ const Wishlist = () => {
 
     const getWishlist = async () => {
         try {
-            const { data } = await axios.get("http://localhost:8000/api/auth/wishlist");
+            const { data } = await axios.get("/api/auth/wishlist");
             setWishlist(data.wishlist);
         } catch (error) {
             console.log(error);
@@ -24,7 +24,7 @@ const Wishlist = () => {
             // Optimistic update: Remove from UI immediately
             setWishlist(prev => prev.filter(item => item._id !== productId));
 
-            const { data } = await axios.post("http://localhost:8000/api/auth/wishlist/toggle", { productId });
+            const { data } = await axios.post("/api/auth/wishlist/toggle", { productId });
             if (data?.success) {
                 toast.success(data.message);
 
@@ -71,7 +71,7 @@ const Wishlist = () => {
                                 {wishlist.map((p) => (
                                     <div key={p._id} className="border border-slate-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
                                         <img
-                                            src={`http://localhost:8000/api/menu/food-photo/${p._id}`}
+                                            src={`/api/menu/food-photo/${p._id}`}
                                             className="w-full h-48 object-cover"
                                             alt={p.name}
                                         />

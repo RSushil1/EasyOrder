@@ -13,7 +13,7 @@ const Orders = () => {
 
     const getOrders = async () => {
         try {
-            const { data } = await axios.get("http://localhost:8000/api/orders/get-orders");
+            const { data } = await axios.get("/api/orders/get-orders");
             setOrders(data.orders);
         } catch (error) {
             console.log(error);
@@ -93,7 +93,7 @@ const Orders = () => {
                                                     <div className="w-16 h-16 flex-shrink-0">
                                                         {p.food ? (
                                                             <img
-                                                                src={`http://localhost:8000/api/menu/food-photo/${p.food._id}`}
+                                                                src={`/api/menu/food-photo/${p.food._id}`}
                                                                 className="w-full h-full object-cover rounded"
                                                                 alt={p.food.name}
                                                             />

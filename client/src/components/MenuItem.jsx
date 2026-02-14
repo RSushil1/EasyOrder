@@ -19,7 +19,7 @@ const MenuItem = ({ item }) => {
             return;
         }
         try {
-            const { data } = await axios.post("http://localhost:8000/api/auth/wishlist/toggle", { productId: item._id });
+            const { data } = await axios.post("/api/auth/wishlist/toggle", { productId: item._id });
             if (data?.success) {
                 toast.success(data.message);
 
@@ -51,7 +51,7 @@ const MenuItem = ({ item }) => {
                     </div>
                 )}
                 <img
-                    src={`http://localhost:8000/api/menu/food-photo/${item._id}`}
+                    src={`/api/menu/food-photo/${item._id}`}
                     alt={item.name}
                     className={`w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 relative z-10 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
                     onLoad={() => setImageLoaded(true)}

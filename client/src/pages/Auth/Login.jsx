@@ -34,7 +34,7 @@ const Login = () => {
         }
 
         try {
-            const res = await axios.post("http://localhost:8000/api/auth/login", {
+            const res = await axios.post("/api/auth/login", {
                 email,
                 password,
                 cart: cartItems, // Send local cart to merge

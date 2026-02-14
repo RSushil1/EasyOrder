@@ -39,7 +39,7 @@ const Navbar = () => {
     const fetchNotifications = async (pageNum = 1, isLoadMore = false) => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`http://localhost:8000/api/notifications/get-notifications?page=${pageNum}&limit=5`);
+            const { data } = await axios.get(`/api/notifications/get-notifications?page=${pageNum}&limit=5`);
             if (data?.success) {
                 if (isLoadMore) {
                     setNotifications(prev => [...prev, ...data.notifications]);
@@ -108,7 +108,7 @@ const Navbar = () => {
                 setUnreadCount(prev => Math.max(0, prev - 1));
             }
 
-            await axios.put(`http://localhost:8000/api/notifications/mark-read/${notificationId}`);
+            await axios.put(`/api/notifications/mark-read/${notificationId}`);
         } catch (error) {
             console.log(error);
             // Revert on error if needed, or just let next fetch sync it
@@ -117,7 +117,7 @@ const Navbar = () => {
 
     const handleMarkAllRead = async () => {
         try {
-            const { data } = await axios.put(`http://localhost:8000/api/notifications/mark-all-read`);
+            const { data } = await axios.put(`/api/notifications/mark-all-read`);
             if (data?.success) {
                 // Update UI locally
                 const updatedNotifications = notifications.map(n => ({

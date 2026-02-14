@@ -43,7 +43,7 @@ const Profile = () => {
         }
 
         try {
-            const { data } = await axios.put("http://localhost:8000/api/auth/profile/update", {
+            const { data } = await axios.put("/api/auth/profile/update", {
                 name,
                 email,
                 password,

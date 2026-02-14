@@ -12,7 +12,7 @@ const Home = () => {
     // Get Total Count
     const getTotal = async () => {
         try {
-            const { data } = await axios.get("http://localhost:8000/api/menu/product-count");
+            const { data } = await axios.get("/api/menu/product-count");
             setTotal(data?.total);
         } catch (error) {
             console.log(error);
@@ -27,7 +27,7 @@ const Home = () => {
     const loadMore = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`http://localhost:8000/api/menu/product-list/${page}`);
+            const { data } = await axios.get(`/api/menu/product-list/${page}`);
             setMenuItems(prev => [...prev, ...data?.products]);
             setLoading(false);
         } catch (error) {
@@ -47,7 +47,7 @@ const Home = () => {
         const fetchInitial = async () => {
             try {
                 setLoading(true);
-                const { data } = await axios.get(`http://localhost:8000/api/menu/product-list/1`);
+                const { data } = await axios.get(`/api/menu/product-list/1`);
                 setLoading(false);
                 setMenuItems(data?.products);
             } catch (error) {

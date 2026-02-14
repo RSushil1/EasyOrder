@@ -17,7 +17,7 @@ export const CartProvider = ({ children }) => {
     // Fetch cart from DB when user logs in
     useEffect(() => {
         if (auth?.token) {
-            axios.get('http://localhost:8000/api/auth/profile/cart')
+            axios.get('/api/auth/profile/cart')
                 .then(res => {
                     if (res.data?.cart) {
                         setCartItems(res.data.cart);
@@ -46,7 +46,7 @@ export const CartProvider = ({ children }) => {
             const updateCartCheck = async () => {
                 try {
                     // Debouncing could be good here, but for simplicity:
-                    await axios.put('http://localhost:8000/api/auth/profile/cart', { cart: cartItems });
+                    await axios.put('/api/auth/profile/cart', { cart: cartItems });
                 } catch (error) {
                     console.log("Error syncing cart", error);
                 }

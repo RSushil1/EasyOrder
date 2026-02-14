@@ -48,7 +48,7 @@ const Checkout = () => {
         }));
 
         try {
-            const { data } = await axios.post('http://localhost:8000/api/orders/create-order', {
+            const { data } = await axios.post('/api/orders/create-order', {
                 cart,
                 payment: formData // Using formData as payment details/shipping info for simplicity
             });

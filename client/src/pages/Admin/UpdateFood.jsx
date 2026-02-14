@@ -189,7 +189,7 @@ const UpdateProduct = () => {
                                 ) : (
                                     <div className="text-center">
                                         <img
-                                            src={`http://localhost:8000/api/menu/product-photo/${id}`}
+                                            src={`/api/menu/product-photo/${id}`}
                                             alt="product_photo"
                                             height={"200px"}
                                             className="img img-responsive mx-auto rounded-lg shadow-sm"

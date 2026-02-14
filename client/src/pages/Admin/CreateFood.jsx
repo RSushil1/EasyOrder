@@ -42,7 +42,7 @@ const CreateFood = () => {
             productData.append("category", category);
 
             const { data } = await axios.post(
-                "http://localhost:8000/api/menu/create-food",
+                "/api/menu/create-food",
                 productData
             );
             if (data?.success) {
