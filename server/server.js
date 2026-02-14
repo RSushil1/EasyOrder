@@ -38,12 +38,19 @@ app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/notifications', notificationRoutes);
 
+// rest api
+app.get("/", (req, res) => {
+    res.send("<h1>Welcome to EasyOrder App</h1>");
+});
+
 const PORT = process.env.PORT || 8000;
 
-// Only run the server if we are not in a Vercel environment (Vercel handles the server via the exported app)
-if (!process.env.VERCEL) {
+// Only listen if not running on Vercel (or similar serverless identifying env var)
+// However, typically for Vercel, we just export the app. Vercel looks for the export.
+// If we run `node server.js` locally, we want it to listen.
+if (process.env.DEV_MODE !== 'production') {
     server.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
+        console.log(`Server Running on ${process.env.DEV_MODE} mode on port ${PORT}`);
     });
 }
 
@@ -52,4 +59,3 @@ if (!process.env.VERCEL) {
 // For now, let's rely on initSocket.
 
 export default app;
-
