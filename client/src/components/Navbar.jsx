@@ -14,6 +14,9 @@ const Navbar = () => {
     const navigate = useNavigate();
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [loading, setLoading] = useState(false);
     const socket = useSocket();
 
     const handleLogout = () => {
@@ -29,32 +32,50 @@ const Navbar = () => {
     };
 
     // Fetch notifications
-    const fetchNotifications = async () => {
+    const fetchNotifications = async (pageNum = 1, isLoadMore = false) => {
         try {
-            const { data } = await axios.get("http://localhost:8000/api/notifications/get-notifications");
+            setLoading(true);
+            const { data } = await axios.get(`http://localhost:8000/api/notifications/get-notifications?page=${pageNum}&limit=5`);
             if (data?.success) {
-                setNotifications(data.notifications);
-                setUnreadCount(data.total);
+                if (isLoadMore) {
+                    setNotifications(prev => [...prev, ...data.notifications]);
+                } else {
+                    setNotifications(data.notifications);
+                }
+                setUnreadCount(data.unreadCount);
+                setHasMore(data.currentPage < data.totalPages);
             }
+            setLoading(false);
         } catch (error) {
             console.log(error);
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         if (auth?.token) {
-            fetchNotifications();
+            fetchNotifications(1, false);
         }
     }, [auth?.token]);
+
+    const loadMoreNotifications = () => {
+        if (!loading && hasMore) {
+            const nextPage = page + 1;
+            setPage(nextPage);
+            fetchNotifications(nextPage, true);
+        }
+    };
 
     // Socket listener for real-time updates
     useEffect(() => {
         if (!socket) return;
 
         const handleNotification = () => {
-            // Add a small delay to ensure the notification is saved in DB before fetching
+            // New notification came in, fetch page 1 again to see it at top
+            // Alternatively, we could prepend it if we had the data, but fetching ensures sync
             setTimeout(() => {
-                fetchNotifications();
+                fetchNotifications(1, false);
+                setPage(1); // Reset to page 1
             }, 500);
         };
 
@@ -71,12 +92,22 @@ const Navbar = () => {
 
     const handleRead = async (notificationId) => {
         try {
-            const { data } = await axios.put(`http://localhost:8000/api/notifications/mark-read/${notificationId}`);
-            if (data?.success) {
-                fetchNotifications(); // Refresh
+            // Optimistically update UI
+            const updatedNotifications = notifications.map(n =>
+                n._id === notificationId ? { ...n, readBy: [...n.readBy, auth?.user?._id] } : n
+            );
+            setNotifications(updatedNotifications);
+
+            // If it was unread, decrement count
+            const wasUnread = notifications.find(n => n._id === notificationId && !n.readBy.includes(auth?.user?._id));
+            if (wasUnread) {
+                setUnreadCount(prev => Math.max(0, prev - 1));
             }
+
+            await axios.put(`http://localhost:8000/api/notifications/mark-read/${notificationId}`);
         } catch (error) {
             console.log(error);
+            // Revert on error if needed, or just let next fetch sync it
         }
     };
 
@@ -84,7 +115,13 @@ const Navbar = () => {
         try {
             const { data } = await axios.put(`http://localhost:8000/api/notifications/mark-all-read`);
             if (data?.success) {
-                fetchNotifications();
+                // Update UI locally
+                const updatedNotifications = notifications.map(n => ({
+                    ...n,
+                    readBy: [...n.readBy, auth?.user?._id] // simplistic append, safe enough for UI check
+                }));
+                setNotifications(updatedNotifications);
+                setUnreadCount(0);
                 toast.success("All marked as read");
             }
         } catch (error) {
@@ -93,32 +130,71 @@ const Navbar = () => {
     }
 
     const notificationContent = (
-        <div style={{ width: 300, maxHeight: 400, overflowY: 'auto' }}>
-            <div className="flex justify-between items-center mb-2 pb-2 border-b">
-                <span className="font-bold text-gray-700">Notifications ({unreadCount})</span>
+        <div className="bg-white rounded-lg shadow-sm" style={{ width: 380, maxHeight: 500, display: 'flex', flexDirection: 'column' }}>
+            <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-lg">
+                <span className="font-bold text-gray-800 text-base">Notifications {unreadCount > 0 && <span className="text-orange-500 text-xs ml-1">({unreadCount} new)</span>}</span>
                 {unreadCount > 0 && (
-                    <span onClick={handleMarkAllRead} className="text-xs text-blue-500 cursor-pointer hover:underline">
+                    <span onClick={handleMarkAllRead} className="text-xs font-semibold text-blue-600 cursor-pointer hover:text-blue-800 transition">
                         Mark all read
                     </span>
                 )}
             </div>
-            <List
-                itemLayout="horizontal"
-                dataSource={notifications}
-                locale={{ emptyText: "No new notifications" }}
-                renderItem={(item) => (
-                    <List.Item
-                        onClick={() => handleRead(item._id)}
-                        className={`cursor-pointer hover:bg-gray-50 transition p-2 rounded ${!item.readBy.includes(auth?.user?._id) ? 'bg-blue-50' : ''}`}
-                        style={{ padding: '8px', borderBottom: '1px solid #f0f0f0' }}
-                    >
-                        <List.Item.Meta
-                            title={<span className="text-sm text-gray-800">{item.message}</span>}
-                            description={<span className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleTimeString()}</span>}
-                        />
-                    </List.Item>
+
+            <div
+                className="overflow-y-auto custom-scrollbar"
+                style={{ maxHeight: 400, overscrollBehavior: 'contain' }}
+            >
+                <List
+                    itemLayout="horizontal"
+                    dataSource={notifications}
+                    locale={{ emptyText: <div className="text-center py-8 text-gray-400">No notifications yet</div> }}
+                    renderItem={(item) => {
+                        const isRead = item.readBy.includes(auth?.user?._id);
+                        return (
+                            <List.Item
+                                onClick={() => !isRead && handleRead(item._id)}
+                                className={`cursor-pointer transition-all duration-200 px-4 py-3 border-b border-gray-50 last:border-0 ${!isRead ? 'bg-blue-50/50 hover:bg-blue-50' : 'hover:bg-gray-50'}`}
+                            >
+                                <List.Item.Meta
+                                    avatar={
+                                        <div className={`mt-1 h-2 w-2 rounded-full ${!isRead ? 'bg-orange-500 shadow-sm' : 'bg-transparent'}`}></div>
+                                    }
+                                    title={
+                                        <p className={`text-sm mb-1 leading-snug ${!isRead ? 'font-semibold text-gray-800' : 'text-gray-600'}`}>
+                                            {item.message}
+                                        </p>
+                                    }
+                                    description={
+                                        <span className="text-xs text-gray-400 font-medium">
+                                            {new Date(item.createdAt).toLocaleString()}
+                                        </span>
+                                    }
+                                />
+                            </List.Item>
+                        );
+                    }}
+                />
+
+                {hasMore && (
+                    <div className="p-2 text-center border-t border-gray-100 bg-gray-50/50">
+                        <button
+                            onClick={loadMoreNotifications}
+                            disabled={loading}
+                            className="text-xs font-semibold text-gray-600 hover:text-orange-600 transition disabled:opacity-50 py-1 px-3 rounded-full hover:bg-white"
+                        >
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-3 w-3 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Loading...
+                                </span>
+                            ) : "Load More"}
+                        </button>
+                    </div>
                 )}
-            />
+            </div>
         </div>
     );
 

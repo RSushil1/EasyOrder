@@ -1,27 +1,41 @@
 import notificationModel from "../models/notificationModel.js";
 
 // Get notifications for the logged-in user
+// Get notifications for the logged-in user
 export const getUserNotifications = async (req, res) => {
     try {
         const userId = req.user._id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
 
-        // Find notifications where:
-        // 1. 'to' array includes userId OR 'to' array is empty (broadcast)
-        // 2. userId is NOT in 'readBy' array (unread)
+        // Base query: Notifications for this user or broadcast
+        const query = {
+            $or: [{ to: { $in: [userId] } }, { to: { $size: 0 } }],
+        };
+
+        // Get paginated notifications
         const notifications = await notificationModel
-            .find({
-                $and: [
-                    {
-                        $or: [{ to: { $in: [userId] } }, { to: { $size: 0 } }],
-                    },
-                    { readBy: { $ne: userId } },
-                ],
-            })
-            .sort({ createdAt: -1 });
+            .find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        // Get total count of notifications
+        const total = await notificationModel.countDocuments(query);
+
+        // Get count of UNREAD notifications for badge
+        const unreadCount = await notificationModel.countDocuments({
+            ...query,
+            readBy: { $ne: userId },
+        });
 
         res.status(200).send({
             success: true,
-            total: notifications.length,
+            total,
+            unreadCount,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page,
             notifications,
         });
     } catch (error) {
