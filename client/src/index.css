@@ -29,3 +29,20 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
+
+@media (max-width: 768px) {
+  .notification-popover {
+    position: fixed !important;
+    top: 85px !important;
+    left: 10px !important;
+    right: 10px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    z-index: 1000 !important;
+  }
+
+  .notification-popover .ant-popover-arrow {
+    display: none !important;
+  }
+}

@@ -134,7 +134,7 @@ const Navbar = () => {
     }
 
     const notificationContent = (
-        <div className="bg-white rounded-lg shadow-sm" style={{ width: 380, maxHeight: 500, display: 'flex', flexDirection: 'column' }}>
+        <div className="bg-white rounded-lg shadow-sm w-[90vw] sm:w-[380px] flex flex-col max-h-[70vh]">
             <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-lg">
                 <span className="font-bold text-gray-800 text-base">Notifications {unreadCount > 0 && <span className="text-orange-500 text-xs ml-1">({unreadCount} new)</span>}</span>
                 {unreadCount > 0 && (
@@ -145,8 +145,7 @@ const Navbar = () => {
             </div>
 
             <div
-                className="overflow-y-auto custom-scrollbar"
-                style={{ maxHeight: 400, overscrollBehavior: 'contain' }}
+                className="overflow-y-auto custom-scrollbar flex-1 overscroll-contain"
             >
                 <List
                     itemLayout="horizontal"
@@ -244,6 +243,7 @@ const Navbar = () => {
                                     title={null}
                                     trigger="click"
                                     placement="bottomRight"
+                                    overlayClassName="notification-popover"
                                 >
                                     <span className="cursor-pointer inline-block">
                                         <Badge count={unreadCount} offset={[-2, 2]} size="small">
