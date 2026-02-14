@@ -51,3 +51,5 @@ initSocket(io);
 // or we can keep a simple log if we want, but initSocket does logging too.
 // For now, let's rely on initSocket.
 
+export default app;
+
