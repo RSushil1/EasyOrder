@@ -40,12 +40,12 @@ app.use('/api/notifications', notificationRoutes);
 
 const PORT = process.env.PORT || 8000;
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
-
-// Socket connection
-initSocket(io);
+// Only run the server if we are not in a Vercel environment (Vercel handles the server via the exported app)
+if (!process.env.VERCEL) {
+    server.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
 
 // Remove the inline io.on('connection') since it is handled in initSocket now
 // or we can keep a simple log if we want, but initSocket does logging too.
