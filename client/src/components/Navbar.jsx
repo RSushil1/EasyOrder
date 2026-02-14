@@ -18,6 +18,9 @@ const Navbar = () => {
     const [hasMore, setHasMore] = useState(true);
     const [loading, setLoading] = useState(false);
     const socket = useSocket();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const closeMenu = () => setIsMenuOpen(false);
 
     const handleLogout = () => {
         setAuth({
@@ -29,6 +32,7 @@ const Navbar = () => {
         clearCart(); // Clear cart on logout
         toast.success("Logout Successfully");
         navigate("/login");
+        closeMenu();
     };
 
     // Fetch notifications
@@ -203,11 +207,15 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20">
                     <div className="flex items-center">
+                        {/* Mobile Menu Button - Left side or you can put it right side. Usually right side is better with cart. Let's put it left for now or keep standard. */}
+                        {/* Actually, let's keep logo left. Hamburger on right usually. */}
                         <Link to="/" className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 tracking-tight cursor-pointer hover:opacity-80 transition-opacity">
                             EasyOrder <span className="text-3xl">🍕</span>
                         </Link>
                     </div>
-                    <div className="flex items-center space-x-6">
+
+                    <div className="flex items-center space-x-4">
+                        {/* Desktop Menu */}
                         <div className="hidden md:flex items-center space-x-6">
                             <Link to="/" className="text-slate-600 hover:text-orange-600 font-medium transition">Home</Link>
                             {!auth.user ? (
@@ -228,37 +236,77 @@ const Navbar = () => {
                             )}
                         </div>
 
-                        {auth?.user && (
-                            <Popover
-                                content={notificationContent}
-                                title={null}
-                                trigger="click"
-                                placement="bottomRight"
-                            >
-                                <span className="cursor-pointer mr-4 inline-block">
-                                    <Badge count={unreadCount} offset={[-2, 2]} size="small">
-                                        <BellOutlined className="text-2xl text-slate-600 hover:text-orange-600 transition" />
-                                    </Badge>
-                                </span>
-                            </Popover>
-                        )}
-
-                        <button
-                            onClick={() => setIsCartOpen(true)}
-                            className="relative p-3 text-slate-600 hover:text-orange-600 focus:outline-none transition-colors duration-200 rounded-full hover:bg-orange-50"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            {cartCount > 0 && (
-                                <span className="absolute top-1 right-1 inline-flex items-center justify-center h-5 w-5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full shadow-sm ring-2 ring-white">
-                                    {cartCount}
-                                </span>
+                        {/* Icons (Notification & Cart) - Visible on both mobile and desktop */}
+                        <div className="flex items-center space-x-4">
+                            {auth?.user && (
+                                <Popover
+                                    content={notificationContent}
+                                    title={null}
+                                    trigger="click"
+                                    placement="bottomRight"
+                                >
+                                    <span className="cursor-pointer inline-block">
+                                        <Badge count={unreadCount} offset={[-2, 2]} size="small">
+                                            <BellOutlined className="text-2xl text-slate-600 hover:text-orange-600 transition" />
+                                        </Badge>
+                                    </span>
+                                </Popover>
                             )}
-                        </button>
+
+                            <button
+                                onClick={() => setIsCartOpen(true)}
+                                className="relative p-2 text-slate-600 hover:text-orange-600 focus:outline-none transition-colors duration-200 rounded-full hover:bg-orange-50"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                {cartCount > 0 && (
+                                    <span className="absolute top-0 right-0 inline-flex items-center justify-center h-5 w-5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full shadow-sm ring-2 ring-white">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Mobile Hamburger Button */}
+                            <button
+                                className="md:hidden text-slate-600 hover:text-orange-600 focus:outline-none ml-2"
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    {isMenuOpen ? (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    ) : (
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                    )}
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Menu Overlay */}
+            {isMenuOpen && (
+                <div className="md:hidden bg-white border-t border-slate-100 absolute top-20 left-0 w-full shadow-lg flex flex-col py-4 px-6 space-y-4 animate-in slide-in-from-top-5 duration-200">
+                    <Link to="/" onClick={closeMenu} className="text-lg text-slate-700 hover:text-orange-600 font-medium transition py-2 border-b border-slate-50">Home</Link>
+                    {!auth.user ? (
+                        <>
+                            <Link to="/register" onClick={closeMenu} className="text-lg text-slate-700 hover:text-orange-600 font-medium transition py-2 border-b border-slate-50">Register</Link>
+                            <Link to="/login" onClick={closeMenu} className="text-lg text-slate-700 hover:text-orange-600 font-medium transition py-2 border-b border-slate-50">Login</Link>
+                        </>
+                    ) : (
+                        <>
+                            <span className="text-slate-500 text-sm font-medium">Signed in as <span className="text-slate-800">{auth.user.name}</span></span>
+                            {auth.user.role === 1 ? (
+                                <Link to="/admin/dashboard" onClick={closeMenu} className="text-lg text-slate-700 hover:text-orange-600 font-medium transition py-2 border-b border-slate-50">Admin Dashboard</Link>
+                            ) : (
+                                <Link to="/dashboard/user" onClick={closeMenu} className="text-lg text-slate-700 hover:text-orange-600 font-medium transition py-2 border-b border-slate-50">Dashboard</Link>
+                            )}
+                            <button onClick={handleLogout} className="text-left text-lg text-red-500 hover:text-red-600 font-medium transition py-2">Logout</button>
+                        </>
+                    )}
+                </div>
+            )}
         </nav>
     );
 };
