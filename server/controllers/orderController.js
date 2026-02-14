@@ -118,6 +118,10 @@ export const getAllOrdersController = async (req, res) => {
     }
 };
 
+import { notifyOrderStatusUpdate } from "../helpers/socketHelper.js";
+
+// ... imports
+
 //order status
 export const orderStatusController = async (req, res) => {
     try {
@@ -127,11 +131,10 @@ export const orderStatusController = async (req, res) => {
             orderId,
             { status },
             { new: true }
-        );
+        ).populate("buyer", "name");
 
-        // Emit socket event
-        const io = req.app.get('socketio');
-        io.emit('order-status-updated', { orderId, status });
+        // Emit socket event using helper
+        notifyOrderStatusUpdate(orders);
 
         res.json(orders);
     } catch (error) {

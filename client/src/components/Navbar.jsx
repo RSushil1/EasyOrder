@@ -2,11 +2,19 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/auth';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Badge, Popover, Avatar, List } from "antd";
+import { BellOutlined } from "@ant-design/icons"; // Make sure to install if not present, otherwise use react-icons
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { useSocket } from '../context/SocketProvider';
 
 const Navbar = () => {
     const { cartCount, setIsCartOpen, clearCart } = useCart();
     const [auth, setAuth] = useAuth();
     const navigate = useNavigate();
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const socket = useSocket();
 
     const handleLogout = () => {
         setAuth({
@@ -19,6 +27,100 @@ const Navbar = () => {
         toast.success("Logout Successfully");
         navigate("/login");
     };
+
+    // Fetch notifications
+    const fetchNotifications = async () => {
+        try {
+            const { data } = await axios.get("http://localhost:8000/api/notifications/get-notifications");
+            if (data?.success) {
+                setNotifications(data.notifications);
+                setUnreadCount(data.total);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        if (auth?.token) {
+            fetchNotifications();
+        }
+    }, [auth?.token]);
+
+    // Socket listener for real-time updates
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNotification = () => {
+            // Add a small delay to ensure the notification is saved in DB before fetching
+            setTimeout(() => {
+                fetchNotifications();
+            }, 500);
+        };
+
+        socket.on("order-status-updated", handleNotification);
+        socket.on("product-created", handleNotification);
+        socket.on("product-updated", handleNotification);
+
+        return () => {
+            socket.off("order-status-updated", handleNotification);
+            socket.off("product-created", handleNotification);
+            socket.off("product-updated", handleNotification);
+        };
+    }, [socket]);
+
+    const handleRead = async (notificationId) => {
+        try {
+            const { data } = await axios.put(`http://localhost:8000/api/notifications/mark-read/${notificationId}`);
+            if (data?.success) {
+                fetchNotifications(); // Refresh
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleMarkAllRead = async () => {
+        try {
+            const { data } = await axios.put(`http://localhost:8000/api/notifications/mark-all-read`);
+            if (data?.success) {
+                fetchNotifications();
+                toast.success("All marked as read");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const notificationContent = (
+        <div style={{ width: 300, maxHeight: 400, overflowY: 'auto' }}>
+            <div className="flex justify-between items-center mb-2 pb-2 border-b">
+                <span className="font-bold text-gray-700">Notifications ({unreadCount})</span>
+                {unreadCount > 0 && (
+                    <span onClick={handleMarkAllRead} className="text-xs text-blue-500 cursor-pointer hover:underline">
+                        Mark all read
+                    </span>
+                )}
+            </div>
+            <List
+                itemLayout="horizontal"
+                dataSource={notifications}
+                locale={{ emptyText: "No new notifications" }}
+                renderItem={(item) => (
+                    <List.Item
+                        onClick={() => handleRead(item._id)}
+                        className={`cursor-pointer hover:bg-gray-50 transition p-2 rounded ${!item.readBy.includes(auth?.user?._id) ? 'bg-blue-50' : ''}`}
+                        style={{ padding: '8px', borderBottom: '1px solid #f0f0f0' }}
+                    >
+                        <List.Item.Meta
+                            title={<span className="text-sm text-gray-800">{item.message}</span>}
+                            description={<span className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleTimeString()}</span>}
+                        />
+                    </List.Item>
+                )}
+            />
+        </div>
+    );
 
     return (
         <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-100 transition-all duration-300">
@@ -49,6 +151,21 @@ const Navbar = () => {
                                 </>
                             )}
                         </div>
+
+                        {auth?.user && (
+                            <Popover
+                                content={notificationContent}
+                                title={null}
+                                trigger="click"
+                                placement="bottomRight"
+                            >
+                                <span className="cursor-pointer mr-4 inline-block">
+                                    <Badge count={unreadCount} offset={[-2, 2]} size="small">
+                                        <BellOutlined className="text-2xl text-slate-600 hover:text-orange-600 transition" />
+                                    </Badge>
+                                </span>
+                            </Popover>
+                        )}
 
                         <button
                             onClick={() => setIsCartOpen(true)}

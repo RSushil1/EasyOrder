@@ -2,6 +2,10 @@ import foodModel from "../models/foodModel.js";
 import fs from "fs";
 import slugify from "slugify";
 
+import { notifyNewProduct, notifyProductUpdate } from "../helpers/socketHelper.js";
+
+// ... imports
+
 //create food
 export const createFoodController = async (req, res) => {
     try {
@@ -32,6 +36,10 @@ export const createFoodController = async (req, res) => {
             products.photo.contentType = photo.mimetype;
         }
         await products.save();
+
+        // Notify about new product
+        notifyNewProduct(products);
+
         res.status(201).send({
             success: true,
             message: "Food Created Successfully",
@@ -46,6 +54,8 @@ export const createFoodController = async (req, res) => {
         });
     }
 };
+
+
 
 //get all items
 export const getMenu = async (req, res) => {
@@ -97,6 +107,9 @@ export const getSingleFood = async (req, res) => {
 // get photo
 export const foodPhotoController = async (req, res) => {
     try {
+        if (!req.params.pid || req.params.pid === "undefined" || req.params.pid === "null") {
+            return res.status(400).send({ error: "Invalid product ID" });
+        }
         const product = await foodModel.findById(req.params.pid).select("photo");
         if (product.photo.data) {
             res.set("Content-type", product.photo.contentType);
@@ -164,6 +177,10 @@ export const updateFoodController = async (req, res) => {
             products.photo.contentType = photo.mimetype;
         }
         await products.save();
+
+        // Notify about product update
+        notifyProductUpdate(products);
+
         res.status(201).send({
             success: true,
             message: "Food Updated Successfully",

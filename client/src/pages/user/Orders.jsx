@@ -14,7 +14,7 @@ const Orders = () => {
     const getOrders = async () => {
         try {
             const { data } = await axios.get("http://localhost:8000/api/orders/get-orders");
-            setOrders(data);
+            setOrders(data.orders);
         } catch (error) {
             console.log(error);
         }
@@ -91,16 +91,22 @@ const Orders = () => {
                                             {o?.products?.map((p, j) => (
                                                 <div className="flex items-center mb-4 last:mb-0" key={j}>
                                                     <div className="w-16 h-16 flex-shrink-0">
-                                                        <img
-                                                            src={`http://localhost:8000/api/menu/food-photo/${p.food._id}`}
-                                                            className="w-full h-full object-cover rounded"
-                                                            alt={p.food.name}
-                                                        />
+                                                        {p.food ? (
+                                                            <img
+                                                                src={`http://localhost:8000/api/menu/food-photo/${p.food._id}`}
+                                                                className="w-full h-full object-cover rounded"
+                                                                alt={p.food.name}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-slate-200 rounded flex items-center justify-center text-xs text-slate-400">
+                                                                N/A
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div className="ml-4 flex-grow">
-                                                        <p className="font-bold text-slate-800">{p.food.name}</p>
+                                                        <p className="font-bold text-slate-800">{p.food ? p.food.name : "Product Unavailable"}</p>
                                                         <p className="text-sm text-slate-600">Qty: {p.quantity}</p>
-                                                        <p className="text-sm text-slate-600">Price: ${p.food.price}</p>
+                                                        <p className="text-sm text-slate-600">Price: {p.food ? `$${p.food.price}` : "N/A"}</p>
                                                     </div>
                                                 </div>
                                             ))}
