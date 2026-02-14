@@ -1,0 +1,8 @@
+{
+  "name": "easyorder",
+  "private": true,
+  "scripts": {
+    "build": "npm install --prefix client && npm install --prefix server && npm run build --prefix client",
+    "start": "node server/server.js"
+  }
+}

@@ -1,61 +1,62 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import connectDB from './config/db.js';
-import authRoutes from './routes/authRoute.js';
-import menuRoutes from './routes/menuRoutes.js';
-import orderRoutes from './routes/orderRoutes.js';
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoute.js";
+import menuRoutes from "./routes/menuRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
-import notificationRoutes from './routes/notificationRoutes.js';
+import http from "http";
+import { Server } from "socket.io";
+import { initSocket } from "./helpers/socketHelper.js";
+
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
-// Connect to database
+// Connect DB
 connectDB();
-
-import http from 'http';
-import { Server } from 'socket.io';
-import { initSocket } from './helpers/socketHelper.js';
 
 const app = express();
 const server = http.createServer(app);
+
+// Socket.IO Setup
 const io = new Server(server, {
     cors: {
-        origin: "*", // allow all origins for now, or specify client URL
-        methods: ["GET", "POST", "PUT", "DELETE"]
-    }
+        origin: "*", // You can restrict later
+        methods: ["GET", "POST", "PUT", "DELETE"],
+    },
 });
 
-// Make io accessible in routes/controllers
-app.set('socketio', io);
+initSocket(io);
+
+// Make io available in controllers
+app.set("socketio", io);
 
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/menu', menuRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/notifications', notificationRoutes);
+// API Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/menu", menuRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/notifications", notificationRoutes);
 
-// rest api
-app.get("/", (req, res) => {
-    res.send("<h1>Welcome to EasyOrder App</h1>");
+// ------------------ SERVE REACT BUILD ------------------
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+app.get(/(.*)/, (req, res) => {
+    res.sendFile(path.join(__dirname, "../client/dist/index.html"));
 });
 
+// ------------------ START SERVER ------------------
 const PORT = process.env.PORT || 8000;
 
-// Only listen if not running on Vercel (or similar serverless identifying env var)
-// However, typically for Vercel, we just export the app. Vercel looks for the export.
-// If we run `node server.js` locally, we want it to listen.
-if (process.env.DEV_MODE !== 'production') {
-    server.listen(PORT, () => {
-        console.log(`Server Running on ${process.env.DEV_MODE} mode on port ${PORT}`);
-    });
-}
-
-// Remove the inline io.on('connection') since it is handled in initSocket now
-// or we can keep a simple log if we want, but initSocket does logging too.
-// For now, let's rely on initSocket.
-
-export default app;
+server.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
