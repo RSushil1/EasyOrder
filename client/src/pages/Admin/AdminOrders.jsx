@@ -119,8 +119,8 @@ const AdminOrders = () => {
                                                         <p className="text-xs text-slate-500">{p.food?.description?.substring(0, 30)}...</p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className="font-bold text-slate-700">${p.food?.price}</span>
-                                                        <span className="text-xs text-slate-400 block">Qty: {p.quantity}</span>
+                                                        <span className="font-bold text-slate-700 block">${(p.food?.price * p.quantity).toFixed(2)}</span>
+                                                        <span className="text-xs text-slate-400 block sm:inline">(${p.food?.price} x {p.quantity})</span>
                                                     </div>
                                                 </div>
                                             ))}

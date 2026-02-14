@@ -78,6 +78,7 @@ const Cart = () => {
                                                                 <h3>{item.name}</h3>
                                                                 <p className="ml-4 font-bold">${(item.price * item.quantity).toFixed(2)}</p>
                                                             </div>
+                                                            <p className="mt-1 text-sm text-slate-500">${item.price} x {item.quantity}</p>
                                                         </div>
                                                         <div className="flex-1 flex items-end justify-between text-sm mt-2">
                                                             <div className="flex items-center border border-slate-200 rounded-lg">

@@ -105,8 +105,11 @@ const Orders = () => {
                                                     </div>
                                                     <div className="ml-4 flex-grow">
                                                         <p className="font-bold text-slate-800">{p.food ? p.food.name : "Product Unavailable"}</p>
-                                                        <p className="text-sm text-slate-600">Qty: {p.quantity}</p>
-                                                        <p className="text-sm text-slate-600">Price: {p.food ? `$${p.food.price}` : "N/A"}</p>
+                                                        <div className="flex flex-wrap gap-x-4 mt-1">
+                                                            <p className="text-sm text-slate-600">Qty: {p.quantity}</p>
+                                                            <p className="text-sm text-slate-600">Price: {p.food ? `$${p.food.price}` : "N/A"}</p>
+                                                            <p className="text-sm font-bold text-slate-800">Total: {p.food ? `$${(p.food.price * p.quantity).toFixed(2)}` : "N/A"}</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ))}
