@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
     const [auth] = useAuth();
 
     useEffect(() => {
-        const newSocket = io("http://localhost:8000", {
+        const newSocket = io("https://easyorder-production.up.railway.app/", {
             query: {
                 userId: auth?.user?._id
             }

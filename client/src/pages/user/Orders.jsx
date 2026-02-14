@@ -26,7 +26,7 @@ const Orders = () => {
 
     // Socket.io connection
     useEffect(() => {
-        const newSocket = io("http://localhost:8000");
+        const newSocket = io("https://easyorder-production.up.railway.app/");
         setSocket(newSocket);
 
         return () => newSocket.close();

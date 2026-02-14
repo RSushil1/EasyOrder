@@ -18,25 +18,63 @@ const MenuItem = ({ item }) => {
             toast.error("Please login to use wishlist");
             return;
         }
+
+        // Store original wishlist for revert
+        const originalWishlist = [...(auth?.user?.wishlist || [])];
+
+        // Optimistic update
+        let updatedWishlist;
+        if (isLiked) {
+            updatedWishlist = originalWishlist.filter(id => id !== item._id);
+        } else {
+            updatedWishlist = [...originalWishlist, item._id];
+        }
+
+        // Update Context & LocalStorage immediately
+        const optimisticUser = { ...auth.user, wishlist: updatedWishlist };
+        setAuth({ ...auth, user: optimisticUser });
+
+        // Update LocalStorage
+        let ls = localStorage.getItem("auth");
+        if (ls) {
+            ls = JSON.parse(ls);
+            ls.user = optimisticUser;
+            localStorage.setItem("auth", JSON.stringify(ls));
+        }
+
         try {
             const { data } = await axios.post("/api/auth/wishlist/toggle", { productId: item._id });
             if (data?.success) {
                 toast.success(data.message);
+                // Server might return the definitive list, sync it if needed, 
+                // but our optimistic update should basically match. 
+                // Uses server response to be sure.
+                const finalUser = { ...auth.user, wishlist: data.wishlist };
+                setAuth({ ...auth, user: finalUser });
 
-                // Update auth context and local storage with new wishlist
-                const updatedUser = { ...auth.user, wishlist: data.wishlist };
-                setAuth({ ...auth, user: updatedUser });
-
-                let ls = localStorage.getItem("auth");
-                if (ls) {
-                    ls = JSON.parse(ls);
-                    ls.user = updatedUser;
-                    localStorage.setItem("auth", JSON.stringify(ls));
+                let lsFinal = localStorage.getItem("auth");
+                if (lsFinal) {
+                    lsFinal = JSON.parse(lsFinal);
+                    lsFinal.user = finalUser;
+                    localStorage.setItem("auth", JSON.stringify(lsFinal));
                 }
+            } else {
+                // If success is false but no error thrown (rare but possible)
+                throw new Error("Failed to toggle wishlist");
             }
         } catch (error) {
             console.log(error);
             toast.error("Something went wrong");
+
+            // Revert to original state on failure
+            setAuth({ ...auth, user: { ...auth.user, wishlist: originalWishlist } });
+
+            let lsRevert = localStorage.getItem("auth");
+            if (lsRevert) {
+                lsRevert = JSON.parse(lsRevert);
+                lsRevert.user = { ...lsRevert.user, wishlist: originalWishlist };
+                localStorage.setItem("auth", JSON.stringify(lsRevert));
+            }
         }
     };
 
